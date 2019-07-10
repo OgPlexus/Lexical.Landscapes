@@ -3,7 +3,7 @@
 
 # ### Loadng the Data
 
-# In[2]:
+# In[ ]:
 
 
 import numpy as np
@@ -43,7 +43,7 @@ pop_words = [data[i][0] for i in range(1,cutoff)]   # this houses the popular wo
 
 # ### Word-pair Constructor
 
-# In[3]:
+# In[ ]:
 
 
 get_ipython().run_cell_magic('time', '', '\n""" A word-pair is a pair of words with the same length where you can go from one to the other by way of swapping \n    a letter at a time from one word to the other, such that each intermediate letter combination is also a word. A 4-letter\n    example is WORD to GENE, since there is the path: WORD -> WORE -> GORE -> GONE -> GENE. Here, we restrict our \n    attention to pairs of words that do not share letters in the same respective location (so that the no. of steps in \n    any path is the same as the length of the words in the pair). \n"""\n\n""" functions """\ndef like_words(X,letter):                      # constructs a lst of words like X but with a different letter (@ \'letter\') \n    Y = X[:letter]+X[letter+1:]\n    sims = []\n    for each in pop_words:\n        test = each[:letter]+each[letter+1:]\n        if test == Y:\n            sims.append(each)\n    sims.remove(X)\n    return sims\n\ndef like_words_in_set(X,letter,Set):            # gives all words (in set) off by the given letter (=int giving position)\n    Y = X[:letter]+X[letter+1:]\n    sims = []\n    for each in Set:\n        test = each[:letter]+each[letter+1:]\n        if test == Y:\n            sims.append(each)\n    sims.remove(X)\n    return sims\n\ndef new_word(X,letter):                         # picks a random word from like_words (if no like word then returns 0)\n    test_words = like_words(X,letter)\n    if len(test_words)>0:\n        new = np.random.choice(test_words)\n        return new\n    else:\n        return 0\n\ndef all_like_words(X):                          # gives a list of all words one letter removed from the input (in pop_words)\n    all_words = [] \n    for j in range(len(X)):\n        all_words.extend(like_words(X,j))\n    return all_words    \n\ndef all_like_words_in_set(X,Set):                   # gives a list of all words one letter removed from the input (in given set)\n    all_words = [] \n    for j in range(len(X)):\n        all_words.extend(like_words_in_set(X,j,Set))\n    return all_words    \n\n\nN = 100         # number of word pairs to find\ni = 0           # serves as an index to be called in the constructor\nDa_Words = []   # will house a list of word-pairs, each having at least one word-path \n\n""" \nIn a nutshell, the algorithm below identifies N word-pairs with paths among each                                  \n\n Step 1: find a random word                                                                                        \n\n Step 2: find another random word, the same as the first, but with one letter randomly swapped to a new letter     \n\n Step 3: repeat Step 2 recursively (using the previous word as the start of the new iteration), making sure to     \n         swap different letter locations each time, until either no word can be found or until all letters have    \n         been swaped to new ones. If all words are found, the start and ending words form the word-pair.\n         If no new word can be found at any step, begin again at Step 1.                                         \n\nRepeat Steps 1-3 until N word-pairs have been identified                                                \n"""\n\nwhile i < N:\n    condition = 0                          # initializes a break condition in the second while loop\n    rnge = list(range(WL))\n    word1 = np.random.choice(pop_words)    # finds a random test candidate called word1\n    Da_Words.append([word1])\n    r = np.random.choice(rnge)             # selects a random letter\n    rnge.remove(r)\n    word2 = new_word(word1,r)              # selects a new random word, word2, like word1 but with a new letter at location r \n    i += 1\n    while condition == 0:\n        if word2 == 0:                     # if no such word2 could be found:\n            Da_Words.remove(Da_Words[i-1])\n            condition = 1                  # breaks the while loop\n            i -= 1\n            continue\n        if len(rnge)==0:                   # if the algorithm reaches the last letter:\n            Da_Words[i-1].append(word2)\n            condition = 1                  # breaks the loop \n        else:\n            r = np.random.choice(rnge)\n            rnge.remove(r)\n            word2 = new_word(word2,r)\n\n           \n        \n""" can also choose your own word pairs, so long as a path exists between them (turn off to keep the previous \'Da_Words\') """        \nDa_Words = [[\'WORD\',\'GENE\']]    # this is an example among 4-letter words')
@@ -51,7 +51,7 @@ get_ipython().run_cell_magic('time', '', '\n""" A word-pair is a pair of words w
 
 # ### Word Chains
 
-# In[4]:
+# In[ ]:
 
 
 """ A word chain is the set of all letter combinations between two words in a given word-pair (i.e. there will be 2**WL 
@@ -92,7 +92,7 @@ for j in range(len(Da_Words)):
 
 # ### Constructing the array of fitness values, $W$
 
-# In[5]:
+# In[ ]:
 
 
 get_ipython().run_cell_magic('time', '', '\n""" W[i][j][k] represents the fitness value of the kth word in the jth year in the ith word-pair; that is, the first index \n    indicates the word-pair (among N such pairs), the second index is the year, and the third index is the word in the \n    word-chain associated with the word-pair.\n"""\n\nW = []\nfor i in range(len(Da_Words)):                            # this indexes over the pairs of words\n    W.append([])\n    for j in range(len(data[i][1:])):                     # this indexes over the years\n        W[i].append([])\n        for those in word_chain[i]:                       # this indexes over those in the word chain\n            if those in ngram_words:\n                index = 1 + ngram_words.index(those)      # we add 1 bc ngram_words is an index below words_from_google\n                W[i][j].append(data[index][j+1])\n            else:\n                W[i][j].append(0)\n      ')
@@ -170,9 +170,9 @@ p.tight_layout()
 # In[ ]:
 
 
-""" Select word-pair of interest; below we use GENE to WORD as an example. Structure save directory in preferred manner """
+""" Select word-pair of interest; below we use WORD to GENE as an example. Structure save directory in preferred manner """
 
-word = ['GENE','WORD']
+word = ['WORD','GENE']
 j = Da_Words.index(word)
 
 #------------------------------------------------------------------------------------------------------------#
@@ -211,7 +211,7 @@ with open('Epistasis/Absolute Mean Data/English/%s Letters/absolute Epistasis %s
 
 # ### NetworkX (fitness landscape): preliminary functions
 
-# In[6]:
+# In[ ]:
 
 
 # organizing the bits for the graph
@@ -270,15 +270,15 @@ def orgnze_pos(indx): # this function creates a position dictionary for the land
 
 # ### NetworkX (fitness landscape): drawing the network
 
-# In[9]:
+# In[ ]:
 
 
 # graphing the network
 
 """ adjust the size of the node and words inside nodes below to accomodate a good fit """
 
-NODE_SIZE = 2500
-WORD_SIZE = 15
+NODE_SIZE = 2500  # 5200 for WL = 3, 2500 for WL = 4, 1000 for WL = 5
+FONT_SIZE = 15    # 25 for WL = 3, 15 for WL = 4, 8 for WL = 5
 
 
 mpl.rcParams['mathtext.fontset'] = 'stix'
@@ -310,7 +310,7 @@ for pair,index in zip(Da_Words,chain_index):
     for year in yrs:
         yr = data[0].index(year)
 
-        fig,ax = plt.subplots(figsize=[10,6])  # change size as needed
+        fig,ax = plt.subplots(figsize=[12,6])  # change size as needed
         graph = dict2nx(temp)
 
 
@@ -325,7 +325,7 @@ for pair,index in zip(Da_Words,chain_index):
                 node_weights.update({node:0})
                 
         n_weights = list(node_weights.values())
-        avg_wght = np.mean(n_weights)
+        avg_wght = np.max(n_weights)
         n_weights = [x/avg_wght for x in n_weights]   
         
 
@@ -349,7 +349,7 @@ for pair,index in zip(Da_Words,chain_index):
                     edge_weights.update({edge:wght})
 
         e_weights = list(edge_weights.values())
-        avg_wght = 1.5*np.mean(e_weights)
+        avg_wght = 3*np.mean(e_weights)   """ <--- Can adjust multiplicative factor to change edge thickness """
         e_weights = [x/avg_wght for x in e_weights]   
 
 
@@ -359,10 +359,15 @@ for pair,index in zip(Da_Words,chain_index):
         draw_nodes = nx.draw_networkx_nodes(graph,pos=pos,ax=None,node_size=NODE_SIZE,alpha=1,linewidths=1,node_color=n_weights,cmap=plt.cm.Blues)
         nx.draw_networkx_labels(graph,pos=pos,font_family='STIXGeneral',font_size=FONT_SIZE,font_weight='bold')
         draw_nodes.set_edgecolor('k')
+        
+        cbar = fig.colorbar(draw_nodes,ax=ax,pad=0,ticks=[0.001,1],shrink=0.75)
+        cbar.ax.tick_params(labelsize=20)
+        cbar.ax.set_yticklabels(['"Low fitness"', '"High fitness"'])
+            
         plt.title('%s to %s %s' %(pair[0],pair[1],year),style='italic',fontsize=40)
         plt.axis('off')
         plt.tight_layout()
-#         plt.savefig('C:/Users/Miles/Documents/Brown/Ogbunu Lab/Evo Word/Fitness/Figures/%s Letter Networks/%s to %s nx graph %s.png' %(str(WL),pair[0],pair[1],year),dpi=500)
+        plt.savefig('C:/Users/Miles/Documents/Brown/Ogbunu Lab/Evo Word/Fitness/Figures/%s Letter Networks/%s to %s nx graph %s.png' %(str(WL),pair[0],pair[1],year),dpi=500)
 
         plt.show()
 
